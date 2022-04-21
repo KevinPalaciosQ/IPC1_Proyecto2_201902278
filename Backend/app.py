@@ -6,20 +6,24 @@ import json
 
 #Importaciones de Clases 
 from Usuario import Usuario
+from Libro import Libro
+
 #Lista de Usuarios
 Usuarios = []
 Usuarios.append(Usuario('a13','Kevin','Usuario_Usac','123456','25','Ingenieria sistemas','201902278'))
 Usuarios.append(Usuario('a12','Dylan','Usuario_Usac1','123456','25','Ingenieria sistemas','201902279'))
+#Lista de Libros
+Libros =[]
+Libros.append(Libro('100','don quijote','novela','nose','100','50','50','2021','usac'))
 #Creación del Entorno de Flask
 app= Flask(__name__)
 CORS(app)##para que llegue la informacion de forma segura
-#METODO GET
-#Método Utilizado para leer datos
+
 #Mostrar un Mensaje en Pantalla
 @app.route('/', methods =["GET"])
 def Inicio():
     return('<h1>Hola Mundo</h1>')
-#Mostrar Usuarios
+#METODO PARA MOSTRAR USUARIOS
 @app.route('/user',methods=["GET"])
 def MostarUsuarios():
     global Usuarios
@@ -53,10 +57,10 @@ def MostrarUsuario(user):
             }
             return(jsonify(objeto))
     return(jsonify({
-        "Mensaje":"No se encontró el Usuario "
+        "Mensaje":"El Usuario no existe "
     }))
 
-#METODO POST
+#METODO CREAR SIN VALIDACION
 @app.route('/user/crear',methods=["POST"])
 def AgregarUser():
     global Usuarios
@@ -73,20 +77,7 @@ def AgregarUser():
     }))
 
 #VALIDAR USUARIO 
-#METODO POST
 @app.route('/user/verificar',methods=["POST"])
-def VerificarUser():
-    global Usuarios
-    nick =   request.json["user_nickname"]
-    for i in range(len(Usuarios)):
-        if nick == Usuarios[i].getuser_nickname():
-            return(jsonify({
-        "Mensaje":"Bienvenido Usuario"
-    })) 
-    return(jsonify({
-        "Mensaje":"Intruso"
-    }))
-@app.route('/user/verificar1',methods=["POST"])
 def VerificarUser2():
     global Usuarios
     nick =   request.json["user_nickname"]
@@ -107,6 +98,95 @@ def VerificarUser2():
         "Mensaje":"El Usuario No Existe"
     }))
 
+
+#METODO PARA VERIFICAR SI EL USUARIO EXISTE
+def VerificarUsuario(nusuario):
+    global Usuarios
+    validar = False
+    for Usuario in Usuarios:
+        if str(nusuario) == str(Usuario.getid_user()):
+            validar =True
+    return validar
+#METODO CREAR USUARIO CON VALIDACION
+@app.route('/user/crearval',methods=["POST"])
+def AgregarUserVAL():
+    global Usuarios
+    try:
+        iduser = request.json["id_user"]
+        nombre = request.json["user_display_name"]
+        nick =   request.json["user_nickname"]
+        password = request.json["user_password"]
+        age = request.json["user_age"]
+        career = request.json["user_career"]
+        carnet = request.json["user_carnet"]
+        if VerificarUsuario(iduser)== False:
+            Usuarios.append(Usuario(iduser,nombre,nick,password,age,career,carnet))
+            return(jsonify({
+                "Mensaje":"Se agregó el usuario correctamente"
+            }))
+        else:
+            return(jsonify({
+                "Mensaje":"Por favor cree un nuevo id "
+            }))        
+    except:
+            return(jsonify({
+                "Mensaje":"response"
+            }))
+#METODO PARA MOSTRAR LIBROS
+@app.route('/book/show',methods=["GET"])
+def MostarLibros():
+    global Libros
+    books=[]
+    for lib in Libros:
+        objeto1={
+            "id_book": lib.getid_book(),
+            "book_title": lib.getbook_title(),
+            "book_type": lib.getbook_type(),
+            "author": lib.getauthor(),
+            "book_count": lib.getbook_count(),
+            "book_available": lib.getbook_available(),
+            "book_not_available": lib.getbook_not_available(),
+            "book_year": lib.getbook_year(),
+            "book_editorial": lib.getbook_editorial()
+        }
+        books.append(objeto1)
+    return(jsonify(books) )
+#METODO PARA VERIFICAR SI EL LIBRO EXISTE
+def VerificarLibro(nlibro):
+    global Libros
+    validar = False
+    for Libro in Libros:
+        if str(nlibro) == str(Libro.getid_book()):
+            validar =True
+    return validar           
+#METODO CREAR LIBRO CON VALIDACION
+@app.route('/book',methods=["POST"])
+def Agregarbook():
+    global Libros
+    try:
+        idbook = request.json["id_book"]
+        booktitle = request.json["book_title"]
+        tipo =   request.json["book_type"]
+        autor = request.json["author"]
+        bc = request.json["book_count"]
+        ba = request.json["book_available"]
+        bna = request.json["book_not_available"]
+        by = request.json["book_year"]
+        be = request.json["book_editorial"]
+        if VerificarLibro(idbook)== False:
+            Libros.append(Libro(idbook,booktitle,tipo,autor,bc,ba,bna,by,be))
+            return(jsonify({
+                "Mensaje":"Se agregó el libro correctamente"
+            }))
+        else:
+            return(jsonify({
+                "Mensaje":"Por favor cree un nuevo id "
+            }))        
+    except:
+            return(jsonify({
+                "Mensaje":"response"
+            }))
+#METODO PARA ACTUALIZAR LIBRO 
 #Levantar la API
 if __name__ == "__main__":
     app.run(host ="localhost", port=3000, debug= True )##para que se ejecute
