@@ -187,6 +187,36 @@ def Agregarbook():
                 "Mensaje":"response"
             }))
 #METODO PARA ACTUALIZAR LIBRO 
+@app.route('/book/actualizar/<string:buk>', methods=['PUT'])
+def Actualizarlibro(buk):
+    global Libros
+    idbook = request.json["id_book"]
+    booktitle = request.json["book_title"]
+    tipo =   request.json["book_type"]
+    autor = request.json["author"]
+    bc = request.json["book_count"]
+    ba = request.json["book_available"]
+    bna = request.json["book_not_available"]
+    by = request.json["book_year"]
+    be = request.json["book_editorial"]
+    for i in range(len(Libros)):
+        if buk ==  Libros[i].getid_book():
+            Libros[i].setid_book(idbook)
+            Libros[i].setbook_title(booktitle)
+            Libros[i].setbook_type(tipo)
+            Libros[i].setauthor(autor)
+            Libros[i].setbook_count(bc)
+            Libros[i].setbook_available(ba)
+            Libros[i].setbook_not_available(bna)
+            Libros[i].setbook_book_year(by)
+            Libros[i].setbook_editorial(be)
+            return(jsonify({
+                "Mensaje":"Se actualizó con exito"
+            }))
+    return(jsonify({
+        "Mensaje":"No se encontró el usuario"
+            }))
+#Levantar la AP
 #Levantar la API
 if __name__ == "__main__":
     app.run(host ="localhost", port=3000, debug= True )##para que se ejecute
