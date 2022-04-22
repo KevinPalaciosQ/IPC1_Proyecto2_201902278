@@ -1,4 +1,6 @@
 ##Librerias Importadas
+from asyncio.windows_events import NULL
+from turtle import title
 from webbrowser import get
 from flask import Flask,jsonify, request
 from flask_cors import CORS
@@ -14,7 +16,9 @@ Usuarios.append(Usuario('a13','Kevin','Usuario_Usac','123456','25','Ingenieria s
 Usuarios.append(Usuario('a12','Dylan','Usuario_Usac1','123456','25','Ingenieria sistemas','201902279'))
 #Lista de Libros
 Libros =[]
-Libros.append(Libro('100','don quijote','novela','nose','100','50','50','2021','usac'))
+Libros.append(Libro('100','don quijote','libro','nose','100','50','50','2021','usac'))
+Libros.append(Libro('101','luna de pluton','novela','dross','200','100','100','2019','venezuela'))
+Libros.append(Libro('102','luna','novela','xelaju','30','20','10','2000','gt'))
 #Creación del Entorno de Flask
 app= Flask(__name__)
 CORS(app)##para que llegue la informacion de forma segura
@@ -83,17 +87,22 @@ def VerificarUser2():
     nick =   request.json["user_nickname"]
     password = request.json["user_password"]
     for i in range(len(Usuarios)):
-        if nick == Usuarios[i].getuser_nickname() and password==Usuarios[i].getuser_password():
-            objeto= {
-            "id_user": Usuarios[i].getid_user(),
-            "user_display_name": Usuarios[i].getuser_display_name(),
-            "user_nickname": Usuarios[i].getuser_nickname(),
-            "user_password": Usuarios[i].getuser_password(),
-            "user_age": Usuarios[i].getuser_age(),
-            "user_career": Usuarios[i].getuser_career(),
-            "user_carnet": Usuarios[i].getuser_carnet()
-            }
-            return(jsonify(objeto)) 
+        if nick == Usuarios[i].getuser_nickname() :
+            if  password==Usuarios[i].getuser_password():
+                objeto= {
+                "id_user": Usuarios[i].getid_user(),
+                "user_display_name": Usuarios[i].getuser_display_name(),
+                "user_nickname": Usuarios[i].getuser_nickname(),
+                "user_password": Usuarios[i].getuser_password(),
+                "user_age": Usuarios[i].getuser_age(),
+                "user_career": Usuarios[i].getuser_career(),
+                "user_carnet": Usuarios[i].getuser_carnet()
+                }
+                return(jsonify(objeto)) 
+            else:
+                return(jsonify({
+        "Mensaje":"Contraseña invalida"
+    }))
     return(jsonify({
         "Mensaje":"El Usuario No Existe"
     }))
@@ -122,16 +131,18 @@ def AgregarUserVAL():
         if VerificarUsuario(iduser)== False:
             Usuarios.append(Usuario(iduser,nombre,nick,password,age,career,carnet))
             return(jsonify({
+                "status":200,
                 "Mensaje":"Se agregó el usuario correctamente"
-            }))
+            })),200
         else:
             return(jsonify({
                 "Mensaje":"Por favor cree un nuevo id "
-            }))        
+            })),400        
     except:
             return(jsonify({
+                
                 "Mensaje":"response"
-            }))
+            })),400
 #METODO PARA MOSTRAR LIBROS
 @app.route('/book/show',methods=["GET"])
 def MostarLibros():
@@ -177,15 +188,15 @@ def Agregarbook():
             Libros.append(Libro(idbook,booktitle,tipo,autor,bc,ba,bna,by,be))
             return(jsonify({
                 "Mensaje":"Se agregó el libro correctamente"
-            }))
+            })),200
         else:
             return(jsonify({
                 "Mensaje":"Por favor cree un nuevo id "
-            }))        
+            })),400        
     except:
             return(jsonify({
                 "Mensaje":"response"
-            }))
+            })),400
 #METODO PARA ACTUALIZAR LIBRO 
 @app.route('/book/actualizar/<string:buk>', methods=['PUT'])
 def Actualizarlibro(buk):
@@ -212,11 +223,106 @@ def Actualizarlibro(buk):
             Libros[i].setbook_editorial(be)
             return(jsonify({
                 "Mensaje":"Se actualizó con exito"
-            }))
+            })),200
     return(jsonify({
-        "Mensaje":"No se encontró el usuario"
-            }))
-#Levantar la AP
+        "Mensaje":"No se encontró el libro"
+            })),400
+#METODO PARA BUSCAR LIBRO 
+@app.route('/book/personalizado', methods=['GET'])
+def validarlibro():
+    global Libros
+    #idbook=None
+    try:
+        
+        idbook = request.json["id_book"]
+        for i in range(len(Libros)):
+            if idbook == Libros[i].getid_book():
+                objeto2={
+                    "id_book":Libros[i].getid_book(),
+                    "book_title":Libros[i].getbook_title(),
+                    "book_type": Libros[i].getbook_type(),
+                    "author": Libros[i].getauthor(),
+                    "book_count": Libros[i].getbook_count(),
+                    "book_available": Libros[i].getbook_available(),
+                    "book_not_available": Libros[i].getbook_not_available(),
+                    "book_year":Libros[i].getbook_year(),
+                    "book_editorial": Libros[i].getbook_editorial()
+                }
+                return(jsonify(objeto2))
+        return(jsonify({
+            "Mensaje":"No se encontró el id"
+                }))
+    except:
+            idbook=None
+            return(jsonify({
+            "Mensaje":"Por favor ingrese un json valido"
+                }))
+
+#METODO PARA BUSCAR LIBRO  Prueba
+@app.route('/book/personalizado/prueba', methods=['GET'])
+def validarlibro2():
+    global Libros
+    idbook=None
+    booktype=None
+    booktitle=None
+    try:
+        try:
+            idbook = request.json["id_book"]
+        except:
+            idbook=None
+
+        try:
+            booktype = request.json["book_type"]
+        except:
+            booktype=None
+        try:
+            booktitle = request.json["book_title"]
+        except:
+            booktitle=None
+        
+        if idbook!=None:
+            for i in range(len(Libros)):
+                if idbook == Libros[i].getid_book():
+                    objeto2={
+                        "id_book":Libros[i].getid_book(),
+                        "book_title":Libros[i].getbook_title(),
+                        "book_type": Libros[i].getbook_type(),
+                        "author": Libros[i].getauthor(),
+                        "book_count": Libros[i].getbook_count(),
+                        "book_available": Libros[i].getbook_available(),
+                        "book_not_available": Libros[i].getbook_not_available(),
+                        "book_year":Libros[i].getbook_year(),
+                        "book_editorial": Libros[i].getbook_editorial()
+                    }
+                    return(jsonify(objeto2))
+                else:
+                    return(jsonify({
+                "Mensaje":"No se encontró el id"
+                    }))
+        elif idbook==None and booktype!=None and booktitle==None:
+            tipo=[]
+            for i in range(len(Libros)):
+                if booktype==Libros[i].getbook_type():
+                    objeto2={
+                        "id_book":Libros[i].getid_book(),
+                        "book_title":Libros[i].getbook_title(),
+                        "book_type": Libros[i].getbook_type(),
+                        "author": Libros[i].getauthor(),
+                        "book_count": Libros[i].getbook_count(),
+                        "book_available": Libros[i].getbook_available(),
+                        "book_not_available": Libros[i].getbook_not_available(),
+                        "book_year":Libros[i].getbook_year(),
+                        "book_editorial": Libros[i].getbook_editorial()
+                    }
+                    tipo.append(objeto2)
+            return(jsonify(tipo))
+
+    except:
+    
+
+        return(jsonify({
+            "Mensaje":"Por favor ingrese un libro"
+                }))
 #Levantar la API
 if __name__ == "__main__":
     app.run(host ="localhost", port=3000, debug= True )##para que se ejecute
