@@ -28,7 +28,7 @@ CORS(app)##para que llegue la informacion de forma segura
 def Inicio():
     return('<h1>Hola Mundo</h1>')
 #METODO PARA MOSTRAR USUARIOS
-@app.route('/user',methods=["GET"])
+@app.route('/users',methods=["GET"])
 def MostarUsuarios():
     global Usuarios
     Users=[]
@@ -59,29 +59,14 @@ def MostrarUsuario(user):
             "user_career": Usuarios[i].getuser_career(),
             "user_carnet": Usuarios[i].getuser_carnet()
             }
-            return(jsonify(objeto))
+            return(jsonify(objeto)),200
     return(jsonify({
         "Mensaje":"El Usuario no existe "
-    }))
+    })),400
 
-#METODO CREAR SIN VALIDACION
-@app.route('/user/crear',methods=["POST"])
-def AgregarUser():
-    global Usuarios
-    iduser = request.json["id_user"]
-    nombre = request.json["user_display_name"]
-    nick =   request.json["user_nickname"]
-    password = request.json["user_password"]
-    age = request.json["user_age"]
-    career = request.json["user_career"]
-    carnet = request.json["user_carnet"]
-    Usuarios.append(Usuario(iduser,nombre,nick,password,age,career,carnet))
-    return(jsonify({
-        "Mensaje":"Se agregó el usuario correctamente"
-    }))
 
-#VALIDAR USUARIO 
-@app.route('/user/verificar',methods=["POST"])
+#VALIDAR LOGIN
+@app.route('/user/validar',methods=["POST"])
 def VerificarUser2():
     global Usuarios
     nick =   request.json["user_nickname"]
@@ -98,14 +83,14 @@ def VerificarUser2():
                 "user_career": Usuarios[i].getuser_career(),
                 "user_carnet": Usuarios[i].getuser_carnet()
                 }
-                return(jsonify(objeto)) 
+                return(jsonify(objeto)),200
             else:
                 return(jsonify({
         "Mensaje":"Contraseña invalida"
-    }))
+    })),400
     return(jsonify({
         "Mensaje":"El Usuario No Existe"
-    }))
+    })),400
 
 
 #METODO PARA VERIFICAR SI EL USUARIO EXISTE
@@ -117,7 +102,7 @@ def VerificarUsuario(nusuario):
             validar =True
     return validar
 #METODO CREAR USUARIO CON VALIDACION
-@app.route('/user/crearval',methods=["POST"])
+@app.route('/user/create',methods=["POST"])
 def AgregarUserVAL():
     global Usuarios
     try:
@@ -131,7 +116,6 @@ def AgregarUserVAL():
         if VerificarUsuario(iduser)== False:
             Usuarios.append(Usuario(iduser,nombre,nick,password,age,career,carnet))
             return(jsonify({
-                "status":200,
                 "Mensaje":"Se agregó el usuario correctamente"
             })),200
         else:
@@ -171,7 +155,7 @@ def VerificarLibro(nlibro):
             validar =True
     return validar           
 #METODO CREAR LIBRO CON VALIDACION
-@app.route('/book',methods=["POST"])
+@app.route('/book/create',methods=["POST"])
 def Agregarbook():
     global Libros
     try:
@@ -225,38 +209,8 @@ def Actualizarlibro(buk):
                 "Mensaje":"Se actualizó con exito"
             })),200
     return(jsonify({
-        "Mensaje":"No se encontró el libro"
+        "Mensaje":"Por favor ingrese un id valido"
             })),400
-#METODO PARA BUSCAR LIBRO 
-@app.route('/book/personalizado', methods=['GET'])
-def validarlibro():
-    global Libros
-    #idbook=None
-    try:
-        
-        idbook = request.json["id_book"]
-        for i in range(len(Libros)):
-            if idbook == Libros[i].getid_book():
-                objeto2={
-                    "id_book":Libros[i].getid_book(),
-                    "book_title":Libros[i].getbook_title(),
-                    "book_type": Libros[i].getbook_type(),
-                    "author": Libros[i].getauthor(),
-                    "book_count": Libros[i].getbook_count(),
-                    "book_available": Libros[i].getbook_available(),
-                    "book_not_available": Libros[i].getbook_not_available(),
-                    "book_year":Libros[i].getbook_year(),
-                    "book_editorial": Libros[i].getbook_editorial()
-                }
-                return(jsonify(objeto2))
-        return(jsonify({
-            "Mensaje":"No se encontró el id"
-                }))
-    except:
-            idbook=None
-            return(jsonify({
-            "Mensaje":"Por favor ingrese un json valido"
-                }))
 
 #METODO PARA BUSCAR LIBRO  Prueba
 @app.route('/book/personalizado/prueba', methods=['GET'])
@@ -270,7 +224,6 @@ def validarlibro2():
             idbook = request.json["id_book"]
         except:
             idbook=None
-
         try:
             booktype = request.json["book_type"]
         except:
@@ -279,7 +232,6 @@ def validarlibro2():
             booktitle = request.json["book_title"]
         except:
             booktitle=None
-        
         if idbook!=None:
             for i in range(len(Libros)):
                 if idbook == Libros[i].getid_book():
@@ -295,10 +247,10 @@ def validarlibro2():
                         "book_editorial": Libros[i].getbook_editorial()
                     }
                     return(jsonify(objeto2))
-                else:
-                    return(jsonify({
+                
+            return(jsonify({
                 "Mensaje":"No se encontró el id"
-                    }))
+                    })),400
         elif idbook==None and booktype!=None and booktitle==None:
             tipo=[]
             for i in range(len(Libros)):
@@ -315,14 +267,29 @@ def validarlibro2():
                         "book_editorial": Libros[i].getbook_editorial()
                     }
                     tipo.append(objeto2)
-            return(jsonify(tipo))
-
+            return(jsonify(tipo)),200
+            
+        elif idbook==None and booktype==None and booktitle!=None:
+            titu=[]
+            for i in range(len(Libros)):
+                if booktitle==Libros[i].getbook_title():
+                    objeto2={
+                        "id_book":Libros[i].getid_book(),
+                        "book_title":Libros[i].getbook_title(),
+                        "book_type": Libros[i].getbook_type(),
+                        "author": Libros[i].getauthor(),
+                        "book_count": Libros[i].getbook_count(),
+                        "book_available": Libros[i].getbook_available(),
+                        "book_not_available": Libros[i].getbook_not_available(),
+                        "book_year":Libros[i].getbook_year(),
+                        "book_editorial": Libros[i].getbook_editorial()
+                    }
+                    titu.append(objeto2)
+            return(jsonify(titu)),200
     except:
-    
-
         return(jsonify({
-            "Mensaje":"Por favor ingrese un libro"
-                }))
+            "Mensaje":"Por favor ingresa json valido"
+                })),400
 #Levantar la API
 if __name__ == "__main__":
     app.run(host ="localhost", port=3000, debug= True )##para que se ejecute
