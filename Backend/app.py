@@ -212,9 +212,10 @@ def Actualizarlibro(buk):
         "Mensaje":"Por favor ingrese un id valido"
             })),400
 
-#METODO PARA BUSCAR LIBRO  Prueba
-@app.route('/book/personalizado/prueba', methods=['GET'])
-def validarlibro2():
+
+#METODO PARA BUSCAR LIBRO  Prueba 2
+@app.route('/book/search', methods=['GET'])
+def validarlibro23():
     global Libros
     idbook=None
     booktype=None
@@ -267,8 +268,12 @@ def validarlibro2():
                         "book_editorial": Libros[i].getbook_editorial()
                     }
                     tipo.append(objeto2)
-            return(jsonify(tipo)),200
-            
+            if len(tipo)==0:
+                return(jsonify({
+                    "Mensaje":"No se encontró el tipo"
+                        })),400
+            else:
+                return(jsonify(tipo)),200
         elif idbook==None and booktype==None and booktitle!=None:
             titu=[]
             for i in range(len(Libros)):
@@ -285,7 +290,12 @@ def validarlibro2():
                         "book_editorial": Libros[i].getbook_editorial()
                     }
                     titu.append(objeto2)
-            return(jsonify(titu)),200
+            if len(titu)==0:
+                return(jsonify({
+                    "Mensaje":"No se encontró el titulo"
+                        })),400
+            else:
+                return(jsonify(titu)),200
     except:
         return(jsonify({
             "Mensaje":"Por favor ingresa json valido"
